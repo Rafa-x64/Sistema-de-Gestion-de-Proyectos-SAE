@@ -47,28 +47,39 @@ class usuario
         }
     }
 
-    public function inciar_sesion($correo, $contraseña)
+    public function inciar_sesion($correo, $contraseña) //inicia sesion
     {
-        $tipo = $this->tipo_usuario($correo); // solo determina el tipo por el correo
-
-        if ($this->validar_inicio_sesion($correo, $contraseña)) {
-            $this->guardar_en_sesiones($correo);
-
-            if ($tipo == "admin") {
-                echo '<meta http-equiv="refresh" content="0;url=../views/dashboard_admin.php">';
-            } else {
-                echo '<meta http-equiv="refresh" content="0;url=../views/dashboard.php">';
+        if ($this->tipo_usuario($correo, $contraseña) == "usuario") {
+            if ($this->validar_inicio_sesion($correo, $contraseña) == true) {
+                $this->guardar_en_sesiones($correo); //guarda los datos relacionados al correo en la sesion
+?>
+                <meta http-equiv="refresh" content="0;url=../views/dashboard.php">
+            <?php
+            }else{
+                print("correo o contraseña incorrectos");
+                >
+                <meta http-equiv="refresh" content="0;url=../views/login.php">
             }
-        } else {
-            echo "usuario o contraseña incorrectos...";
-            echo '<meta http-equiv="refresh" content="4;url=../views/login.php">';
+        } elseif ($this->tipo_usuario($correo, $contraseña) == "admin") {
+            echo "guardando en sesion el dashboard del admin";
+            $this->guardar_en_sesiones($correo);
+            echo "redireccionando al dashboard del admin";
+            ?>
+            <meta http-equiv="refresh" content="0;url=../views/dashboard_admin.php">
+        <?php
         }
     }
 
-
-    public function tipo_usuario($correo): string
+    public function tipo_usuario($correo, $contraseña): string
     {
-        return ($correo == "admin@SAE.com") ? "admin" : "usuario";
+        if ($correo == "admin@SAE.com" && $contraseña == "123456") {
+            return "admin";
+        } else {
+            if ($this->validar_inicio_sesion($correo, $contraseña)) {
+                return "usuario";
+            }
+        }
+        return "desconocido";
     }
 
     public function validar_inicio_sesion($correo, $contraseña): bool
@@ -106,7 +117,7 @@ class usuario
             $usuario = $con->prepare("SELECT * FROM users WHERE id = ?");
             $usuario->execute([$_SESSION["id"]]);
             $datos = $usuario->fetch(PDO::FETCH_ASSOC);
-?>
+        ?>
             <div class="container">
                 <h1 style="margin-top:1.5rem; margin-bottom:1.5rem;">Configuracion de la cuenta</h1>
                 <form action="editar_cuenta.php" method="POST">

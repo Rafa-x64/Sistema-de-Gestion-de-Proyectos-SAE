@@ -1,6 +1,7 @@
 <?php
 class proyectos
 {
+    use notificacion;
 
     public $empresa;
     public $ciudad;
@@ -53,7 +54,7 @@ class proyectos
             $editar_proyecto->execute([$empresa, $ciudad, $tipo, $fecha, $programador, $estado, $requisitos, $id]);
             print("proyecto editado con exito");
         } catch (PDOException $e) {
-            print($e->getMessage());
+            $this->notificacion_error("Error al editar el proyecto", "dashboard", $e->getMessage(), "../views/dashboard_admin.php");
         }
     }
 

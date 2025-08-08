@@ -66,7 +66,7 @@ class usuario
     }
 
 
-    public function tipo_usuario($correo): string
+    public function determinar_tipo($correo): string
     {
         return ($correo == "admin@SAE.com") ? "admin" : "usuario";
     }
@@ -80,6 +80,7 @@ class usuario
         if ($verificacion && $correo == $verificacion["correo"] && $contraseña == $verificacion["contraseña"]) {
             return true; //si existe un usuario con este nombre y contraseña
         } else {
+            echo "usuario o contraseña incorrectos...";
             return false; //no existe un usuario con este nombre y contraseña
         }
     }

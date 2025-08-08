@@ -49,7 +49,7 @@ class usuario
 
     public function inciar_sesion($correo, $contraseña)
     {
-        $tipo = $this->tipo_usuario($correo); // solo determina el tipo por el correo
+        $tipo = $this->determinar_tipo($correo); // solo determina el tipo por el correo
 
         if ($this->validar_inicio_sesion($correo, $contraseña)) {
             $this->guardar_en_sesiones($correo);
@@ -66,9 +66,16 @@ class usuario
     }
 
 
-    public function tipo_usuario($correo): string
+    public function tipo_usuario($correo, $contraseña): string
     {
-        return ($correo == "admin@SAE.com") ? "admin" : "usuario";
+        if ($correo == "admin@SAE.com" && $contraseña == "123456") {
+            return "admin";
+        } else {
+            if ($this->validar_inicio_sesion($correo, $contraseña)) {
+                return "usuario";
+            }
+        }
+        return "desconocido";
     }
 
     public function validar_inicio_sesion($correo, $contraseña): bool
@@ -80,6 +87,7 @@ class usuario
         if ($verificacion && $correo == $verificacion["correo"] && $contraseña == $verificacion["contraseña"]) {
             return true; //si existe un usuario con este nombre y contraseña
         } else {
+            echo "usuario o contraseña incorrectos...";
             return false; //no existe un usuario con este nombre y contraseña
         }
     }

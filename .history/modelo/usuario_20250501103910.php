@@ -1,6 +1,9 @@
 <?php
+require_once("../config/traits/notificaciones.php");
 class usuario
 {
+
+    use notificacion;
 
     public $nombre;
     public $correo;
@@ -25,12 +28,12 @@ class usuario
                 $registro = $con->prepare("INSERT INTO users (nombre, correo, contraseña, empresa, ciudad) VALUES (?, ?, ?, ?, ?)");
                 $registro->execute([$this->nombre, $this->correo, $this->contraseña, $this->empresa, $this->ciudad]);
 
-                print("registro exitoso");
+                $this->notificacion_correcto("registro realizado correctamente para el usuario $this->nombre", " login", "../views/login.php");
             } catch (PDOException $e) {
-                print($e->getMessage());
+                $this->notificacion_error("error al registrar el usuario", "login", $e->getMessage(), "../views/registro.php");
             }
         } else {
-            print("el correo ya existe");
+            $this->notificacion_error("el correo '$this->correo' ya esta esta asociado a una cuenta", "registro", "", "../views/registro.php");
         }
     }
 
@@ -47,28 +50,33 @@ class usuario
         }
     }
 
-    public function inciar_sesion($correo, $contraseña)
+    public function inciar_sesion($correo, $contraseña) //inicia sesion
     {
-        $tipo = $this->tipo_usuario($correo); // solo determina el tipo por el correo
-
-        if ($this->validar_inicio_sesion($correo, $contraseña)) {
-            $this->guardar_en_sesiones($correo);
-
-            if ($tipo == "admin") {
-                echo '<meta http-equiv="refresh" content="0;url=../views/dashboard_admin.php">';
-            } else {
-                echo '<meta http-equiv="refresh" content="0;url=../views/dashboard.php">';
+        if ($this->tipo_usuario($correo, $contraseña) == "usuario") {
+            if ($this->validar_inicio_sesion($correo, $contraseña)) {
+                $this->guardar_en_sesiones($correo); //guarda los datos relacionados al correo en la sesion
+?>
+                <meta http-equiv="refresh" content="0;url=../views/dashboard.php">
+            <?php
             }
-        } else {
-            echo "usuario o contraseña incorrectos...";
-            echo '<meta http-equiv="refresh" content="4;url=../views/login.php">';
+        } elseif ($this->tipo_usuario($correo, $contraseña) == "admin") {
+            $this->guardar_en_sesiones($correo);
+            ?>
+            <meta http-equiv="refresh" content="0;url=../views/dashboard_admin.php">
+        <?php
         }
     }
 
-
-    public function tipo_usuario($correo): string
+    public function tipo_usuario($correo, $contraseña): string
     {
-        return ($correo == "admin@SAE.com") ? "admin" : "usuario";
+        if ($correo == "admin@SAE.com" && $contraseña == "123456") {
+            return "admin";
+        } else {
+            if ($this->validar_inicio_sesion($correo, $contraseña)) {
+                return "usuario";
+            }
+        }
+        return "desconocido";
     }
 
     public function validar_inicio_sesion($correo, $contraseña): bool
@@ -106,7 +114,7 @@ class usuario
             $usuario = $con->prepare("SELECT * FROM users WHERE id = ?");
             $usuario->execute([$_SESSION["id"]]);
             $datos = $usuario->fetch(PDO::FETCH_ASSOC);
-?>
+        ?>
             <div class="container">
                 <h1 style="margin-top:1.5rem; margin-bottom:1.5rem;">Configuracion de la cuenta</h1>
                 <form action="editar_cuenta.php" method="POST">
@@ -150,9 +158,9 @@ class usuario
             include("../config/conexion.php");
             $editar = $con->prepare("UPDATE users SET nombre = ?, correo = ?, contraseña =?, empresa = ?, ciudad = ? WHERE id = ?");
             $editar->execute([$nombre, $correo, $contraseña, $empresa, $ciudad, $id]);
-            print("usuario editado con exito");
+            $this->notificacion_correcto("cuenta editada correctamente", "configuracion", "../views/configuracion_cuenta.php");
         } catch (PDOException $e) {
-            print($e->getMessage());
+            $this->notificacion_error("error al editar la cuenta", "configuracion", $e->getMessage(), "../views/configuracion_cuenta.php");
         };
     }
 
@@ -162,9 +170,9 @@ class usuario
             include("../config/conexion.php");
             $eliminar = $con->prepare("DELETE FROM users WHERE id = ?");
             $eliminar->execute([$id]);
-            print("usuario eliminado con exito");
+            $this->notificacion_correcto("usuario eliminado con exito", "login", "../views/login.php");
         } catch (PDOException $e) {
-            print($e->getMessage());
+            $this->notificacion_error("error al eliminar la cuenta", "configuracion", $e->getMessage(), "../views/configuracion_cuenta.php");
         }
     }
 }

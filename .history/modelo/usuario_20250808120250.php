@@ -49,26 +49,40 @@ class usuario
 
     public function inciar_sesion($correo, $contraseña)
     {
-        $tipo = $this->tipo_usuario($correo); // solo determina el tipo por el correo
+        $tipo = $this->tipo_usuario($correo, $contraseña);
 
-        if ($this->validar_inicio_sesion($correo, $contraseña)) {
-            $this->guardar_en_sesiones($correo);
-
-            if ($tipo == "admin") {
+        if ($tipo == "usuario") {
+            if ($this->validar_inicio_sesion($correo, $contraseña)) {
+                $this->guardar_en_sesiones($correo);
+                echo '<meta http-equiv="refresh" content="0;url=../views/dashboard.php">';
+            } else {
+                echo '<meta http-equiv="refresh" content="4;url=../views/login.php">';
+            }
+        } elseif ($tipo == "admin") {
+            if ($this->validar_inicio_sesion($correo, $contraseña)) {
+                $this->guardar_en_sesiones($correo);
                 echo '<meta http-equiv="refresh" content="0;url=../views/dashboard_admin.php">';
             } else {
-                echo '<meta http-equiv="refresh" content="0;url=../views/dashboard.php">';
+                echo '<meta http-equiv="refresh" content="4;url=../views/login.php">';
             }
         } else {
+            // Caso desconocido: credenciales inválidas
             echo "usuario o contraseña incorrectos...";
             echo '<meta http-equiv="refresh" content="4;url=../views/login.php">';
         }
     }
 
 
-    public function tipo_usuario($correo): string
+    public function tipo_usuario($correo, $contraseña): string
     {
-        return ($correo == "admin@SAE.com") ? "admin" : "usuario";
+        if ($correo == "admin@SAE.com" && $contraseña == "123456") {
+            return "admin";
+        } else {
+            if ($this->validar_inicio_sesion($correo, $contraseña)) {
+                return "usuario";
+            }
+        }
+        return "desconocido";
     }
 
     public function validar_inicio_sesion($correo, $contraseña): bool
@@ -80,6 +94,7 @@ class usuario
         if ($verificacion && $correo == $verificacion["correo"] && $contraseña == $verificacion["contraseña"]) {
             return true; //si existe un usuario con este nombre y contraseña
         } else {
+            echo "usuario o contraseña incorrectos...";
             return false; //no existe un usuario con este nombre y contraseña
         }
     }

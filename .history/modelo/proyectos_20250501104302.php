@@ -1,6 +1,7 @@
 <?php
 class proyectos
 {
+    use notificacion;
 
     public $empresa;
     public $ciudad;

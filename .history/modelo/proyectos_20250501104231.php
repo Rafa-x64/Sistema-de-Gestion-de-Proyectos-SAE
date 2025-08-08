@@ -1,6 +1,7 @@
 <?php
 class proyectos
 {
+    use notificacion;
 
     public $empresa;
     public $ciudad;
@@ -41,7 +42,7 @@ class proyectos
             $editar_proyecto->execute([$empresa, $ciudad, $tipo, $fecha, $programador, $estado, $requisitos, $id]);
             print("proyecto editado con exito");
         } catch (PDOException $e) {
-            print($e->getMessage());
+            $this->notificacion_error("Error al editar el proyecto", "dashboard", $e->getMessage(), "../views/dashboard.php");
         }
     }
 
@@ -51,9 +52,9 @@ class proyectos
             include("../config/conexion.php");
             $editar_proyecto = $con->prepare("UPDATE proyectos SET empresa = ?, ciudad = ?, tipo = ?, fecha = ?, programador = ?, status = ?, requisitos = ? WHERE id = ?");
             $editar_proyecto->execute([$empresa, $ciudad, $tipo, $fecha, $programador, $estado, $requisitos, $id]);
-            print("proyecto editado con exito");
+            $this->notificacion_correcto("proyecto editado con exito", "dashboard", "../views/dashboard_admin.php");
         } catch (PDOException $e) {
-            print($e->getMessage());
+            $this->notificacion_error("Error al editar el proyecto", "dashboard", $e->getMessage(), "../views/dashboard_admin.php");
         }
     }
 

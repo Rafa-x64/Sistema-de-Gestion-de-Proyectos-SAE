@@ -47,28 +47,18 @@ class usuario
         }
     }
 
-    public function inciar_sesion($correo, $contraseña)
+    
+
+    public function tipo_usuario($correo, $contraseña): string
     {
-        $tipo = $this->tipo_usuario($correo); // solo determina el tipo por el correo
-
-        if ($this->validar_inicio_sesion($correo, $contraseña)) {
-            $this->guardar_en_sesiones($correo);
-
-            if ($tipo == "admin") {
-                echo '<meta http-equiv="refresh" content="0;url=../views/dashboard_admin.php">';
-            } else {
-                echo '<meta http-equiv="refresh" content="0;url=../views/dashboard.php">';
-            }
+        if ($correo == "admin@SAE.com" && $contraseña == "123456") {
+            return "admin";
         } else {
-            echo "usuario o contraseña incorrectos...";
-            echo '<meta http-equiv="refresh" content="4;url=../views/login.php">';
+            if ($this->validar_inicio_sesion($correo, $contraseña)) {
+                return "usuario";
+            }
         }
-    }
-
-
-    public function tipo_usuario($correo): string
-    {
-        return ($correo == "admin@SAE.com") ? "admin" : "usuario";
+        return "desconocido";
     }
 
     public function validar_inicio_sesion($correo, $contraseña): bool
@@ -80,6 +70,7 @@ class usuario
         if ($verificacion && $correo == $verificacion["correo"] && $contraseña == $verificacion["contraseña"]) {
             return true; //si existe un usuario con este nombre y contraseña
         } else {
+            echo "usuario o contraseña incorrectos...";
             return false; //no existe un usuario con este nombre y contraseña
         }
     }
@@ -106,7 +97,7 @@ class usuario
             $usuario = $con->prepare("SELECT * FROM users WHERE id = ?");
             $usuario->execute([$_SESSION["id"]]);
             $datos = $usuario->fetch(PDO::FETCH_ASSOC);
-?>
+            ?>
             <div class="container">
                 <h1 style="margin-top:1.5rem; margin-bottom:1.5rem;">Configuracion de la cuenta</h1>
                 <form action="editar_cuenta.php" method="POST">
